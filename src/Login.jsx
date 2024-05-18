@@ -16,6 +16,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { useNavigate, Link } from "react-router-dom";
+
 const formLoginSchema = z.object({
   username: z.string()
     .min(5, { message: 'Usuário deve ter no mínimo 5 letras' })
@@ -30,6 +32,8 @@ export function Login() {
 
   const [errLogin, setErrLogin] = useState('');
   const [authRequest, setAuthRequest] = useState(false);
+
+  const navegate = useNavigate()
 
   const formLogin = useForm({
     resolver: zodResolver(formLoginSchema),
@@ -58,6 +62,7 @@ export function Login() {
     };
 
     localStorage.setItem('token', dataResponse.result)
+    // navegate('/register')
   }
 
   return (
@@ -131,9 +136,9 @@ export function Login() {
             </div>
             <div className="pt-2 text-center text-sm text-gray-500 dark:text-gray-400">
               Não tem uma conta?
-              <a className="font-medium text-gray-900 pl-1 hover:underline dark:text-gray-50" href="#">
+              <Link to={'/register'} className="font-medium text-gray-900 pl-1 hover:underline dark:text-gray-50">
                 Registre-se
-              </a>
+              </Link>
             </div>
           </div>
         </form>
