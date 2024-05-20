@@ -23,10 +23,17 @@ const formRegisterSchema = z.object({
     .min(5, { message: 'Usuário deve ter no mínimo 5 letras' })
     .max(25, { message: 'Usuário dever ter no máximo 24 letras' })
     .regex(/^[A-Za-z]+$/i, { message: 'O campo usuário permite somente letras' }),
+    email: z.string().email('Insira um e-mail válido.'),
   password: z.string()
     .min(8, { message: 'A senha deve ter no mínimo 8 caracteres' })
     .max(24, { message: 'A senha deve ter no máximo 24 caracteres' }),
-})
+  confirmPassword: z.string()
+    .min(8, { message: 'A senha deve ter no mínimo 8 caracteres' })
+    .max(24, { message: 'A senha deve ter no máximo 24 caracteres' }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "As senhas devem ser iguais.",
+  path: ["confirmPassword"],
+});
 
 export function Register() {
 
@@ -39,15 +46,19 @@ export function Register() {
     resolver: zodResolver(formRegisterSchema),
     defaultValues: {
       username: '',
+      email: '',
       password: '',
+      confirmPassword: ''
     }
   })
 
   async function onSubmit(data) {
 
-    setAuthRequest(true)
+    console.log(data)
 
-    const response = await fetch('http://localhost:3000/api/auth', {
+    // setAuthRequest(true)
+
+    const response = await fetch('http://localhost:3000/api/register', {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
@@ -57,12 +68,7 @@ export function Register() {
 
     const dataResponse = await response.json();
 
-    if (dataResponse.err != '') {
-      return setErrRegister(dataResponse.err);
-    };
-
-    localStorage.setItem('token', dataResponse.result)
-    // navegate('/register')
+    console.log(dataResponse)
   }
 
   return (
@@ -97,6 +103,21 @@ export function Register() {
                   <div className="space-y-2">
                     <FormField
                       control={formRegister.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>E-mail</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Digite o e-mail" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <FormField
+                      control={formRegister.control}
                       name="password"
                       render={({ field }) => (
                         <FormItem>
@@ -114,14 +135,14 @@ export function Register() {
                   <div className="space-y-2">
                     <FormField
                       control={formRegister.control}
-                      name="password"
+                      name="confirmPassword"
                       render={({ field }) => (
                         <FormItem>
                           <div className="flex items-center justify-between">
                             <FormLabel>Confirmar senha</FormLabel>
                           </div>
                           <FormControl>
-                            <Input type='password' placeholder="Digite a senha" {...field} />
+                            <Input type='password' placeholder="Confirme a senha" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
